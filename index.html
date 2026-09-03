@@ -1,0 +1,1656 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>出荷ストッパー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Oswald:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#E9ECE8; --surface:#FFFFFF; --surface2:#F3F5F1; --sunk:#DFE3DC;
+  --ink:#141816; --ink2:#59635C; --ink3:#8B948D; --line:#CFD5CC;
+  --safety:#F5C518; --safety-ink:#20200F;
+  --go:#0C7A3B; --go-bg:#E4F1E7;
+  --stop:#BE1B14; --stop-bg:#FBE6E4;
+  --warn:#A96406; --warn-bg:#FBEEDA;
+  --info:#1C5A87; --info-bg:#E3EDF4;
+  --shadow:0 1px 0 rgba(20,24,22,.06), 0 6px 18px -10px rgba(20,24,22,.28);
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F1211; --surface:#191E1C; --surface2:#212724; --sunk:#0B0E0D;
+    --ink:#E8EDE9; --ink2:#98A29B; --ink3:#6C7570; --line:#2C3431;
+    --safety:#F5C518; --safety-ink:#20200F;
+    --go:#43B96E; --go-bg:#12291B;
+    --stop:#F0574C; --stop-bg:#2E1512;
+    --warn:#DE9A33; --warn-bg:#2C1F0C;
+    --info:#6FB0DC; --info-bg:#10222E;
+    --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 22px -12px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F1211; --surface:#191E1C; --surface2:#212724; --sunk:#0B0E0D;
+  --ink:#E8EDE9; --ink2:#98A29B; --ink3:#6C7570; --line:#2C3431;
+  --safety:#F5C518; --safety-ink:#20200F;
+  --go:#43B96E; --go-bg:#12291B;
+  --stop:#F0574C; --stop-bg:#2E1512;
+  --warn:#DE9A33; --warn-bg:#2C1F0C;
+  --info:#6FB0DC; --info-bg:#10222E;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 22px -12px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  font-size:16px; line-height:1.65; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:560px;margin:0 auto;min-height:100vh;background:var(--ground);
+  display:flex;flex-direction:column}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.35}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;padding:10px 14px}
+.mark{width:30px;height:30px;flex:none;border-radius:5px;background:var(--safety);
+  display:grid;place-items:center;color:var(--safety-ink);font-family:Oswald,sans-serif;
+  font-weight:600;font-size:17px;line-height:1}
+.brand{font-family:Oswald,"Noto Sans JP",sans-serif;font-weight:600;font-size:17px;letter-spacing:.04em}
+.today{margin-left:auto;font-family:Oswald,sans-serif;font-size:14px;color:var(--ink2);
+  font-variant-numeric:tabular-nums;letter-spacing:.03em}
+.iconbtn{border:1px solid var(--line);background:var(--surface2);color:var(--ink2);
+  border-radius:7px;padding:5px 9px;font-size:13px;cursor:pointer;font-family:inherit}
+.iconbtn:hover{color:var(--ink)}
+
+main{flex:1;padding:14px 14px 40px;display:flex;flex-direction:column;gap:14px}
+
+/* ---------- generic pieces ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.card-h{padding:11px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.card-b{padding:14px}
+.eyebrow{font-family:Oswald,sans-serif;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink3);font-weight:500}
+.ttl{font-size:15.5px;font-weight:700}
+.sub{font-size:13.5px;color:var(--ink2);line-height:1.6}
+
+.btn{font-family:inherit;font-size:16px;font-weight:700;border-radius:9px;border:1px solid transparent;
+  padding:14px 16px;cursor:pointer;width:100%;text-align:left;display:flex;align-items:center;gap:12px;
+  background:var(--surface2);color:var(--ink);border-color:var(--line);line-height:1.4}
+.btn:hover{border-color:var(--ink3)}
+.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{
+  outline:3px solid var(--info);outline-offset:2px}
+.btn.go{background:var(--go);color:#fff;border-color:transparent;justify-content:center}
+.btn.ghost{background:transparent}
+.btn.stopish{background:var(--stop-bg);color:var(--stop);border-color:color-mix(in srgb,var(--stop) 35%,transparent)}
+.btn small{display:block;font-weight:400;font-size:12.5px;opacity:.85;margin-top:1px}
+.btn .num{font-family:Oswald,sans-serif;font-size:20px;width:30px;flex:none;text-align:center;
+  color:var(--ink3);font-weight:500}
+.btn.done .num{color:var(--go)}
+.row{display:flex;flex-direction:column;gap:9px}
+
+/* ---------- home board ---------- */
+.alert{border-radius:var(--r);padding:12px 14px;display:flex;gap:11px;align-items:flex-start;
+  font-size:14px;line-height:1.6;border:1px solid transparent}
+.alert.stop{background:var(--stop-bg);color:var(--stop);border-color:color-mix(in srgb,var(--stop) 30%,transparent)}
+.alert.warn{background:var(--warn-bg);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.alert.ok{background:var(--go-bg);color:var(--go);border-color:color-mix(in srgb,var(--go) 25%,transparent)}
+.alert b{display:block;font-size:14.5px}
+.alert .ic{font-family:Oswald,sans-serif;font-weight:600;font-size:18px;line-height:1.3}
+
+table.board{width:100%;border-collapse:collapse;font-size:13.5px}
+table.board th{font-family:Oswald,sans-serif;font-weight:500;font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink3);text-align:left;padding:0 6px 7px;border-bottom:1px solid var(--line)}
+table.board td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.board tr:last-child td{border-bottom:none}
+.plate{font-family:Oswald,sans-serif;font-size:15px;font-weight:500;letter-spacing:.03em;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-size:11px;font-weight:700;padding:3px 7px;border-radius:5px;white-space:nowrap;
+  border:1px solid transparent;letter-spacing:.02em}
+.chip.on{background:var(--go-bg);color:var(--go);border-color:color-mix(in srgb,var(--go) 28%,transparent)}
+.chip.off{background:var(--stop-bg);color:var(--stop);border-color:color-mix(in srgb,var(--stop) 28%,transparent)}
+.chip.wait{background:var(--sunk);color:var(--ink3);border-color:var(--line)}
+.chip.flag{background:var(--warn-bg);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 28%,transparent)}
+
+/* ---------- promises ---------- */
+.promise{display:flex;gap:11px;padding:11px 0;border-bottom:1px dashed var(--line);align-items:flex-start}
+.promise:last-child{border-bottom:none;padding-bottom:0}
+.promise .n{font-family:Oswald,sans-serif;font-size:15px;color:var(--safety-ink);background:var(--safety);
+  width:23px;height:23px;flex:none;border-radius:4px;display:grid;place-items:center;font-weight:600;margin-top:2px}
+.promise p{margin:0;font-size:14px;line-height:1.6}
+.promise em{display:block;font-style:normal;color:var(--ink2);font-size:12.5px;margin-top:1px}
+
+/* ---------- check runner ---------- */
+.runner{position:fixed;inset:0;z-index:60;background:var(--ground);display:flex;flex-direction:column;
+  overflow-y:auto}
+.runner-in{max-width:560px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column}
+.rail{display:flex;gap:3px;padding:12px 14px 0}
+.rail i{flex:1;height:5px;border-radius:3px;background:var(--sunk);transition:background .2s}
+.rail i.done{background:var(--go)}
+.rail i.now{background:var(--safety)}
+.rbar{display:flex;align-items:center;gap:10px;padding:10px 14px 4px}
+.rbar .step{font-family:Oswald,sans-serif;font-size:12.5px;letter-spacing:.1em;color:var(--ink3);
+  font-variant-numeric:tabular-nums}
+.rbar .flow{font-size:12.5px;font-weight:700;color:var(--ink2)}
+.rbar .x{margin-left:auto}
+.stage{flex:1;padding:8px 18px 20px;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.qtag{font-family:Oswald,sans-serif;font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--stop);font-weight:600}
+.q{font-size:25px;font-weight:900;line-height:1.42;letter-spacing:-.01em}
+.qhelp{font-size:14px;color:var(--ink2);line-height:1.7;background:var(--surface);border:1px solid var(--line);
+  border-left:3px solid var(--info);border-radius:0 8px 8px 0;padding:11px 13px}
+.why{font-size:12.5px;color:var(--ink3);line-height:1.65}
+.acts{display:flex;flex-direction:column;gap:10px;padding-top:2px}
+
+/* hold button */
+.hold{position:relative;overflow:hidden;background:var(--go);color:#fff;border:none;border-radius:10px;
+  padding:20px 16px;font-family:inherit;font-size:18px;font-weight:900;cursor:pointer;width:100%;
+  touch-action:none;user-select:none;-webkit-user-select:none;text-align:center}
+.hold .fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:rgba(255,255,255,.28);pointer-events:none}
+.hold span{position:relative}
+.hold small{position:relative;display:block;font-weight:500;font-size:12.5px;opacity:.9;margin-top:2px}
+.hold.armed{background:var(--go)}
+.tapbtn{background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:17px 16px;
+  font-family:inherit;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;width:100%;text-align:center}
+.tapbtn.pri{border-color:var(--go);color:var(--go)}
+.tapbtn.neg{border-color:var(--stop);color:var(--stop)}
+.tapbtn.plain{font-weight:500;font-size:15px;padding:13px}
+
+/* inputs */
+label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700;color:var(--ink2)}
+input[type=text],input[type=number],select,textarea{
+  font-family:inherit;font-size:17px;padding:12px;border-radius:8px;border:1.5px solid var(--line);
+  background:var(--surface);color:var(--ink);width:100%}
+input[type=number]{font-family:Oswald,sans-serif;font-size:24px;text-align:center;font-variant-numeric:tabular-nums}
+textarea{font-size:13px;line-height:1.6;min-height:170px}
+.pair{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:9px}
+.pair .eq{font-family:Oswald,sans-serif;font-size:22px;color:var(--ink3);padding-bottom:12px}
+.msg{border-radius:8px;padding:12px 13px;font-size:14px;line-height:1.65}
+.msg.stop{background:var(--stop-bg);color:var(--stop)}
+.msg.ok{background:var(--go-bg);color:var(--go)}
+.msg.warn{background:var(--warn-bg);color:var(--warn)}
+
+/* item counter */
+.itemlist{display:flex;flex-direction:column;gap:7px}
+.item{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);
+  border-radius:8px;padding:10px 12px;font-size:14px}
+.item .nm{font-weight:700;flex:1;min-width:0;overflow-wrap:anywhere}
+.item .qty{font-family:Oswald,sans-serif;font-size:17px;font-variant-numeric:tabular-nums;color:var(--go)}
+.item button{background:none;border:none;color:var(--ink3);cursor:pointer;font-size:17px;padding:0 3px;font-family:inherit}
+
+/* certificate */
+.cert{background:var(--surface);border:2px solid var(--go);border-radius:12px;padding:22px 18px;text-align:center}
+.cert .big{font-family:Oswald,sans-serif;font-size:40px;font-weight:600;color:var(--go);line-height:1.1}
+.cert .no{font-family:Oswald,sans-serif;font-size:20px;letter-spacing:.08em;font-variant-numeric:tabular-nums;
+  margin-top:8px}
+.cert dl{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;text-align:left;margin:16px 0 0;
+  font-size:13.5px;border-top:1px solid var(--line);padding-top:14px}
+.cert dt{color:var(--ink3);font-size:12.5px;padding-top:2px}
+.cert dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+
+/* timer */
+.clock{font-family:Oswald,sans-serif;font-size:64px;font-weight:500;text-align:center;
+  font-variant-numeric:tabular-nums;line-height:1;letter-spacing:.02em}
+.clock.due{color:var(--stop)}
+
+/* records */
+.rec{border-bottom:1px solid var(--line);padding:11px 0;display:flex;gap:11px;align-items:flex-start;
+  font-size:13.5px}
+.rec:last-child{border-bottom:none}
+.rec .t{font-family:Oswald,sans-serif;color:var(--ink3);font-variant-numeric:tabular-nums;font-size:13px;
+  flex:none;width:44px;padding-top:1px}
+.rec .m{flex:1;min-width:0}
+.rec .m b{font-size:14px}
+.rec .m div{color:var(--ink2);font-size:12.5px;overflow-wrap:anywhere}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{flex:1;border:none;background:var(--surface);color:var(--ink2);padding:9px 4px;font-family:inherit;
+  font-size:13px;font-weight:700;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.foot{font-size:12px;color:var(--ink3);text-align:center;line-height:1.7;padding:4px 6px 0}
+.hr{height:1px;background:var(--line);border:none;margin:2px 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  .top,.noprint{display:none!important}
+  body,.wrap{background:#fff}
+  .card{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="mark">止</div>
+    <div class="brand">出荷ストッパー</div>
+    <div class="today" id="todayLbl"></div>
+    <button class="iconbtn" id="navRecords">記録</button>
+    <button class="iconbtn" id="navSetup">設定</button>
+  </header>
+  <main id="app"></main>
+</div>
+<div id="runner"></div>
+
+<script>
+/* ============================================================
+   出荷ストッパー — 現場チェックアプリ
+   4件の「原因と改善策」を、順番に答えないと進めない形にしたもの。
+   保存先はこの端末（localStorage）。サーバーには何も送りません。
+   ============================================================ */
+
+const KEY = "shukka-stopper-v1";
+const WKEY = "shukka-stopper-watch-v1";   // 上長の閲覧モードが貯める、読み取り専用の控え
+let storageOK = true;                     // この端末が記録を一時保存できるか
+try{ localStorage.setItem("__probe__","1"); localStorage.removeItem("__probe__"); }
+catch(e){ storageOK = false; }
+const HOLD_MS = 1500;          // 重要項目の長押し時間
+const FAST_SEC_PER_STEP = 2.5; // 1問あたりこれ未満なら「速すぎ」フラグ
+
+/* ---------- 保存 ---------- */
+const blank = { vehicles:["1"], sites:[], staff:[], records:[], seeded:false, timers:[] };
+let S = load();
+function load(){
+  try{ const r = localStorage.getItem(KEY); if(r) return Object.assign({},blank,JSON.parse(r)); }catch(e){}
+  return JSON.parse(JSON.stringify(blank));
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("保存できませんでした（端末の空き容量を確認してください）"); } }
+
+/* ---------- 日付・時刻 ---------- */
+const pad = n => String(n).padStart(2,"0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const hm  = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const WD = ["日","月","火","水","木","金","土"];
+const today = () => ymd(new Date());
+function jpDate(s){ const d=new Date(s+"T00:00:00"); return `${d.getMonth()+1}月${d.getDate()}日(${WD[d.getDay()]})`; }
+
+/* ============================================================
+   チェックの中身  ── 4件の原因・対策から起こした設問
+   type: hold(長押し) / tap(はい・いいえ) / choice / count(2値一致) / text / items
+   ============================================================ */
+const FLOWS = {
+  load:{
+    name:"積込チェック", short:"積込", icon:"1",
+    lead:"品物を積みながら答えます。積み終わってからまとめて答えるのは禁止です。",
+    fields:[
+      {k:"vehicle",label:"車番",kind:"text",list:"vehicles",ph:"例）上田運輸 2号車"},
+      {k:"site",   label:"現場名",kind:"text",list:"sites",ph:"例）PMF様"},
+      {k:"worker", label:"積込者（あなたの氏名）",kind:"text",list:"staff",ph:"氏名を入力"},
+      {k:"when",   label:"配送区分",kind:"choice",opts:["当日出発","翌日配送"]}
+    ],
+    steps:[
+      {type:"items", tag:"数える", q:"積んだ品物を1品ずつ登録してください",
+       help:"1品積むごとに登録します。リストの数量と、実際に数えた数の両方を入力します。数が合わないと登録できません。",
+       why:"「HS-2K60 あり」で丸を付け、2組かどうかを数えていなかった。品名の確認だけでは丸を付けない。"},
+      {type:"hold", tag:"必ず", q:"出荷リストは現場別に1枚ずつ、手元にありますか",
+       help:"複数現場の混載は、1現場を積み終えてから次に移ります。リストは積荷の上に置いてください。",
+       why:"他現場の品と混ざり、どこまで積んだか分からなくなった。"},
+      {type:"tap", tag:"確認", q:"蓋と枠は、1組ずつセットで結束されていますか",
+       help:"「1組＝蓋＋枠」です。離れて置かれていると片方だけ残ります。該当しない品物のときは「該当なし」を選んでください。",
+       na:true,
+       why:"蓋と枠が別置きで、片方だけ／丸ごと残った。"},
+      {type:"choice", tag:"分岐", q:"穴加工のある品（赤い現品票・赤タグ）は含まれていますか",
+       help:"赤タグが付いたままの品は、加工が終わっていません。積んではいけません。",
+       opts:[{t:"含まれていない",v:"なし"},{t:"含まれている",v:"あり",go:"proc"}],
+       why:"削孔図面が別紙で、指示書だけでは標準品と見分けがつかなかった。"},
+      {type:"hold", id:"proc", only:"あり", tag:"加工品", q:"穴の数・径・位置を、図面と現品で照合しましたか",
+       help:"図面を開き、現品の穴を指で数えて突き合わせます。目視だけで済ませないでください。",
+       why:"加工後に図面と照合する人がいなかった。"},
+      {type:"choice", only:"あり", tag:"加工品", q:"加工完了の押印はありますか",
+       help:"押印は、加工した本人が穴数・氏名・時刻を書いて押すものです。",
+       opts:[{t:"押印を確認した",v:"あり"},
+             {t:"押印がない",v:"なし",block:"この品は積めません。加工待ちです。<br>加工待ち置き場へ戻し、事務所へ連絡してください。"}],
+       why:"加工完了の押印がない品を積んでしまった。"},
+      {type:"tap", tag:"確認", q:"現品票の型式を、1品ずつ声に出して読みましたか",
+       help:"寸法違いの似た型式と紛れます。声に出すと目が止まります。",
+       why:"型式が似た品と取り違え、数が合わなくなった。"},
+      {type:"choice", tag:"確認", q:"積込み中に、電話や他の作業で中断しましたか",
+       help:"中断したらリストのレ点の位置から再開します。記憶で再開しないでください。",
+       opts:[{t:"中断しなかった",v:"なし"},{t:"中断した → リストのレ点から再開した",v:"あり・復帰済"}],
+       why:"中断し、再開時にどこまで積んだか抜けた。"},
+      {type:"choice", tag:"空確認", q:"出荷置き場を見に行き、残っている品はゼロでしたか",
+       help:"目の前の分だけ積んで、離れた区画を見ていないことがあります。今から歩いて見てください。",
+       opts:[{t:"見に行った。残品ゼロ",v:"残品ゼロ"},
+             {t:"品物が残っていた",v:"残品あり",block:"積み残しです。<br>出荷リストと照合し、積んでからこのチェックをやり直してください。"}],
+       why:"置き場に残っていても、出発までに誰も見に行かなかった。"},
+      {type:"choice", tag:"伝票", q:"納品伝票をどうしましたか",
+       help:"手渡しできないときは、車番別の伝票ケースに入れ、車内の定位置（助手席）へ入れます。置きっぱなしは不可です。",
+       opts:[{t:"運転手に手渡した",v:"手渡し"},
+             {t:"車番別ケースで車内の定位置に入れた",v:"車内定位置"},
+             {t:"まだ渡していない",v:"未交付",block:"伝票を渡すまでが積込作業です。<br>伝票を渡してから、このチェックを完了してください。"}],
+       why:"手渡しが作業の最後にぶら下がっており、渡した記録も残らなかった。"},
+      {type:"text", key:"driver", tag:"記録", q:"伝票を受け取った運転手の氏名を入力してください",
+       help:"受領者名が、渡した記録になります。",
+       ph:"運転手の氏名",
+       why:"渡したか渡していないかが、後から分からなかった。"}
+    ]
+  },
+
+  lash:{
+    name:"固縛チェック", short:"固縛", icon:"2",
+    lead:"ベルトが緩めば、鉄蓋が路上に落ちます。1項目ずつ、現物を触って答えてください。",
+    fields:[
+      {k:"vehicle",label:"車番",kind:"text",list:"vehicles",ph:"例）上田運輸 2号車"},
+      {k:"worker", label:"固縛した人の氏名",kind:"text",list:"staff",ph:"氏名を入力"}
+    ],
+    steps:[
+      {type:"hold", tag:"最重要", q:"鉄蓋の下と段の間に、ノンスリップマットを敷きましたか",
+       help:"滑らせなければ緩みません。すべての段間に必要です。",
+       why:"鉄蓋は表面が平滑で摩擦が小さく、直置き＋上締めだけでは動きを止められない。"},
+      {type:"tap", tag:"確認", q:"潰れる緩衝材（発泡材・段ボール等）を挟んでいませんか",
+       help:"数ミリ沈むだけで張力はほぼゼロになります。",
+       why:"パレットや養生材が潰れて張力が抜けた。"},
+      {type:"tap", tag:"確認", q:"荷を前方のあおりに密着させ、隙間をなくしましたか",
+       why:"荷が動く余地があると、走行中に張力が抜ける。"},
+      {type:"count", tag:"数える", tagA:"必要な本数", tagB:"実際に掛けた本数",
+       q:"ラッシングベルトの本数を確認してください",
+       help:"寸法別の必要本数を先に入れ、次に実際に掛けた本数を数えて入れます。合わないと進めません。",
+       why:"本数が足りないまま出発した。"},
+      {type:"tap", tag:"確認", q:"ベルトは立てて掛け、斜め掛けまたはループ掛けを併用していますか",
+       help:"上締めだけでは荷は止まりません。直接固縛を必ず併用します。",
+       why:"上締めのみ、ベルトが寝ている、本数が足りない。"},
+      {type:"tap", tag:"確認", q:"角にエッジプロテクターを当てましたか",
+       help:"鉄蓋やパレットの角で食い込み、傷んで張力が抜けます。",
+       why:"角でのベルト損傷。"},
+      {type:"hold", tag:"最重要", q:"ベルトを手で弾き、たるみと音を確認しましたか",
+       help:"手応えだけでは必要な張力に届きません。体重をかけて締めてから、弾いて確かめます。",
+       why:"数回あおっただけ、片手締めで締付け力が不足していた。"},
+      {type:"tap", tag:"確認", q:"ラチェットのハンドルを最後まで倒し、ロックを目視しましたか",
+       help:"段差や急制動で一瞬たるむと爪が飛び、ハンドルが戻ります。",
+       why:"ラチェットの戻り。"},
+      {type:"tap", tag:"確認", q:"余ったベルトを巻いて縛りましたか",
+       why:"ばたつきが緩みと損傷を招く。"},
+      {type:"choice", tag:"器具点検", q:"ベルトとラチェットに、ほつれ・切傷・変形はありませんか",
+       help:"管理番号を付け、月1回点検します。異常品は修理せず、切断して廃棄します。",
+       opts:[{t:"異常なし",v:"異常なし"},
+             {t:"異常があった",v:"異常あり",block:"そのベルトは使えません。<br>切断して廃棄し、予備と交換してから、このチェックをやり直してください。"}],
+       why:"器具の劣化。"}
+    ]
+  },
+
+  depart:{
+    name:"出発前チェック", short:"出発前", icon:"3",
+    lead:"一人では完了できません。積込者と運転者、二人でこの画面を見ながら答えてください。",
+    fields:[
+      {k:"vehicle",label:"車番",kind:"text",list:"vehicles",ph:"例）上田運輸 2号車"},
+      {k:"worker", label:"積込者の氏名",kind:"text",list:"staff",ph:"氏名を入力"},
+      {k:"driver", label:"運転者の氏名",kind:"text",list:"staff",ph:"氏名を入力（積込者と別の人）"}
+    ],
+    steps:[
+      {type:"hold", tag:"二人で", q:"数量を、二人で指差呼称しましたか",
+       help:"出荷リストの数量欄を声に出して読み、現品を指で数えます。二人が同じ数を言えたら押してください。",
+       why:"積込者以外に数量を見た人がいなかった。"},
+      {type:"hold", tag:"二人で", q:"固縛を、二人で指差呼称しましたか",
+       help:"マット・本数・角当て・ラチェットのロックを、二人で見ます。",
+       why:"積んだ本人しか見ておらず、記録も残らなかった。"},
+      {type:"hold", tag:"二人で", q:"納品伝票は、運転者が今この場で持っていますか",
+       help:"運転者が実際に手に持っている、または車内の定位置にあることを二人で見てください。",
+       why:"納品先で発覚するまで、渡し忘れが分からなかった。"},
+      {type:"hold", tag:"空確認", q:"出荷置き場と伝票ラックに、残りはありませんか",
+       help:"二人のどちらかが歩いて見に行き、両方が空であることを確かめます。",
+       why:"残っていることに誰も気づかなかった。"}
+    ],
+    after:"timer"
+  },
+
+  close:{
+    name:"終業前チェック", short:"終業前", icon:"4",
+    lead:"事務・出荷係が、その日の終わりに1回行います。ここで残っていれば必ず気づきます。",
+    fields:[ {k:"worker",label:"実施者の氏名",kind:"text",list:"staff",ph:"氏名を入力"} ],
+    steps:[
+      {type:"choice", tag:"空確認", q:"伝票ラックは、車番ごとに空になっていますか",
+       help:"事務所出入口のラックを1枠ずつ見ます。残っていれば渡し忘れです。",
+       opts:[{t:"すべて空だった",v:"空"},
+             {t:"伝票が残っていた",v:"残あり",go:"leftover"}],
+       why:"終業前に気づく仕組みがなかった。"},
+      {type:"text", id:"leftover", only:"残あり", key:"leftover", tag:"対処",
+       q:"残っていた伝票の車番を入力してください",
+       help:"入力したら、その車の運転手へ今すぐ連絡してください。翌日配送分は明朝の出発前にもう一度確認します。",
+       ph:"例）上田運輸 2号車"},
+      {type:"tap", tag:"確認", q:"翌日配送分の伝票は、積込日のうちに渡しましたか",
+       help:"翌日配送分は積込日と出発日がずれるため、伝票が宙に浮きます。積込日に渡すのがルールです。",
+       na:true,
+       why:"積み終えた時点で作業完了と区切られ、伝票が翌日扱いのまま宙に浮いた。"},
+      {type:"tap", tag:"空確認", q:"出荷置き場に、本日出荷分の残品はありませんか",
+       why:"積み残しに気づく仕組みがなかった。"},
+      {type:"choice", tag:"明日の準備", q:"明日出荷分に、穴加工のある品はありますか",
+       help:"あるなら、明朝の朝礼で品名を読み上げます。1日1回、全員が同じ情報を持つためです。",
+       opts:[{t:"ない",v:"なし"},{t:"ある",v:"あり",go:"procitem"}],
+       why:"受注情報が営業止まりで、加工ありが工場全体に伝わっていなかった。"},
+      {type:"text", id:"procitem", only:"あり", key:"procitem", tag:"朝礼",
+       q:"明朝の朝礼で読み上げる品名を入力してください",
+       help:"この文言がそのまま明日の朝礼メモになります。",
+       ph:"例）スパイラル基礎 φ216 穴加工あり 4本"},
+      {type:"hold", tag:"最後に", q:"本日の未完了チェックを、ホーム画面で確認しましたか",
+       help:"赤で残っているものがあれば、担当者に確認してから終業してください。",
+       why:"全体を見ている人がいなかった。"}
+    ]
+  }
+};
+
+const PROMISES = {
+  load:[ ["1品積むごとにレ点を入れる","後でまとめて付けない"],
+         ["積込後、運転者と二人で数量を指差呼称し、両者が署名する","一人の確認で出発しない"],
+         ["出発前に出荷置き場の空確認をする","残っていれば必ず気づく"] ],
+  lash:[ ["鉄蓋の下と段間に、必ずノンスリップマットを敷く","滑らせなければ緩まない"],
+         ["走り出して5〜10分で必ず止まり、増し締めする","緩みは走り出し直後が最大"],
+         ["出発前は二人で確認し、記録に残す","一人の判断で出発しない"] ],
+  depart:[ ["伝票を手渡し、受領サインをもらうまでが積込完了","積み終わりでは終わらない"],
+           ["手渡しできない時は車番別ケースで車内定位置へ入れる","口頭・置きっぱなしにしない"],
+           ["加工完了の押印がない品は積まない","出荷係が止めてよい"] ],
+  close:[ ["終業前に伝票ラックの空確認をする","残っていれば必ず気づく"],
+          ["朝礼で当日出荷の加工品を読み上げる","全員が同じ情報を持つ"],
+          ["加工ありの品には赤の現品票と赤タグを付ける","見た目で分かるようにする"] ]
+};
+
+/* ============================================================
+   画面
+   ============================================================ */
+const app = document.getElementById("app");
+const runnerEl = document.getElementById("runner");
+document.getElementById("todayLbl").textContent = jpDate(today());
+document.getElementById("navRecords").addEventListener("click",()=>{view="records";render();});
+document.getElementById("navSetup").addEventListener("click",()=>{view="setup";render();});
+let view = "home";
+
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function el(html){ const t=document.createElement("template"); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+function toast(m){
+  const t=el(`<div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99;
+    background:var(--ink);color:var(--ground);padding:11px 17px;border-radius:9px;font-size:14px;font-weight:700;
+    max-width:88vw;text-align:center;box-shadow:var(--shadow)">${esc(m)}</div>`);
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
+}
+
+function render(){
+  if(R) return;                     // チェック実行中は画面を作り直さない
+  runnerEl.innerHTML="";
+  app.innerHTML="";
+  if(view==="home") renderHome();
+  else if(view==="records") renderRecords();
+  else if(view==="setup") renderSetup();
+  else if(view==="watch") renderWatch();
+  window.scrollTo(0,0);
+}
+
+/* ---------- ホーム ---------- */
+function todayRecords(){ return S.records.filter(r=>r.date===today()); }
+
+function renderHome(){
+  const recs = todayRecords();
+  const real = recs.filter(r=>!r.sample);          // 見本は集計から外す
+  const vehicles = [...new Set(recs.filter(r=>r.vehicle).map(r=>r.vehicle))];
+
+  /* 未完了の洗い出し ── これがデジタル版の「空確認」 */
+  const missing = [];
+  [...new Set(real.filter(r=>r.vehicle).map(r=>r.vehicle))].forEach(v=>{
+    const has = k => real.some(r=>r.vehicle===v && r.flow===k && r.status==="done");
+    if(has("load") && !has("lash"))   missing.push([v,"固縛チェック"]);
+    if(has("load") && !has("depart")) missing.push([v,"出発前チェック"]);
+  });
+  const blocked = real.filter(r=>r.status==="blocked");
+  const closed  = real.some(r=>r.flow==="close" && r.status==="done");
+
+  if(blocked.length){
+    app.appendChild(el(`<div class="alert stop"><div class="ic">止</div><div><b>止まっているチェックが ${blocked.length}件 あります</b>
+      ${blocked.map(r=>`${esc(r.vehicle||FLOWS[r.flow].name)}：${esc(r.blockedAt||"")}`).join("<br>")}
+      <br>処置してから、そのチェックをやり直してください。</div></div>`));
+  }
+  if(missing.length){
+    app.appendChild(el(`<div class="alert warn"><div class="ic">未</div><div><b>まだ終わっていないチェックがあります</b>
+      ${missing.map(m=>`${esc(m[0])} … ${m[1]}`).join("<br>")}</div></div>`));
+  }
+  if(!blocked.length && !missing.length && real.length){
+    app.appendChild(el(`<div class="alert ok"><div class="ic">済</div><div><b>本日、止まっているチェックはありません</b>
+      ${closed?"終業前チェックまで完了しています。":"終業前チェックがまだです。"}</div></div>`));
+  }
+
+  /* 4つの入口 */
+  const menu = el(`<div class="card"><div class="card-h"><div class="eyebrow">Check</div>
+    <div class="ttl" style="margin-left:auto;font-size:13px;color:var(--ink2);font-weight:500">上から順に行います</div></div>
+    <div class="card-b"><div class="row" id="menu"></div></div></div>`);
+  app.appendChild(menu);
+  const mrow = menu.querySelector("#menu");
+  Object.entries(FLOWS).forEach(([k,f])=>{
+    const n = real.filter(r=>r.flow===k && r.status==="done").length;
+    const b = el(`<button class="btn ${n?"done":""}">
+      <span class="num">${n?"✓":f.icon}</span>
+      <span style="flex:1">${f.name}<small>${n? `本日 ${n}件 完了` : f.lead.slice(0,26)+"…"}</small></span>
+      <span style="color:var(--ink3);font-size:20px">›</span></button>`);
+    b.addEventListener("click",()=>startFlow(k));
+    mrow.appendChild(b);
+  });
+
+  /* 増し締めタイマー（走行中） */
+  const live = S.timers.filter(t=>!t.done);
+  if(live.length){
+    const c = el(`<div class="card"><div class="card-h"><div class="eyebrow">Retighten</div>
+      <div class="ttl">走り出しの増し締め</div></div><div class="card-b"><div class="row" id="tl"></div></div></div>`);
+    app.appendChild(c);
+    live.forEach(t=>{
+      const b = el(`<button class="btn"><span class="num">⏱</span><span style="flex:1">${esc(t.vehicle)}
+        <small class="tmr" data-id="${t.id}">計算中…</small></span><span style="color:var(--ink3);font-size:20px">›</span></button>`);
+      b.addEventListener("click",()=>openTimer(t.id));
+      c.querySelector("#tl").appendChild(b);
+    });
+    tickTimers();
+  }
+
+  /* 本日の状況ボード */
+  if(vehicles.length){
+    const t = el(`<div class="card"><div class="card-h"><div class="eyebrow">Board</div>
+      <div class="ttl">本日の状況</div></div><div class="card-b" style="overflow-x:auto">
+      <table class="board"><thead><tr><th>車番</th><th>済んだチェック</th></tr></thead><tbody></tbody></table></div></div>`);
+    const tb = t.querySelector("tbody");
+    vehicles.forEach(v=>{
+      const cell = ["load","lash","depart"].map(k=>{
+        const r = recs.find(x=>x.vehicle===v && x.flow===k);
+        if(r && r.status==="done") return `<span class="chip on">${FLOWS[k].short} ${esc(r.endedAt||"")}</span>`;
+        if(r && r.status==="blocked") return `<span class="chip off">${FLOWS[k].short} 止</span>`;
+        return `<span class="chip wait">${FLOWS[k].short} 未</span>`;
+      }).join("");
+      const fl = recs.filter(x=>x.vehicle===v && (x.flags||[]).includes("fast")).length
+        ? `<span class="chip flag">確認が速すぎ</span>` : "";
+      tb.appendChild(el(`<tr><td class="plate">${esc(v)}</td><td><div class="chips">${cell}${fl}</div></td></tr>`));
+    });
+    app.appendChild(t);
+  }
+
+  /* 今日の約束 */
+  const pk = !real.length ? "load" : (closed ? "close" : (real.some(r=>r.flow==="depart")?"lash":"depart"));
+  const pc = el(`<div class="card"><div class="card-h"><div class="eyebrow">Rules</div>
+    <div class="ttl">今日から必ず守る3つ</div></div><div class="card-b" id="pl"></div></div>`);
+  PROMISES[pk].forEach((p,i)=> pc.querySelector("#pl").appendChild(
+    el(`<div class="promise"><div class="n">${i+1}</div><p>${esc(p[0])}<em>${esc(p[1])}</em></p></div>`)));
+  app.appendChild(pc);
+
+  app.appendChild(syncCard());
+
+  const wb = el(`<button class="btn ghost" style="justify-content:center;font-size:14px;color:var(--ink2)">
+    上長・確認する人はこちら（閲覧モード）</button>`);
+  wb.addEventListener("click",()=>{view="watch";render();});
+  app.appendChild(wb);
+
+  app.appendChild(el(`<p class="foot">${dbState==="on"?"記録はこの端末に残り、上長へも自動で共有されます。":"記録はこの端末の中に保存されます。"}<br>
+    「今後は注意します」で終わらせず、見落としても止まる形にするための道具です。</p>`));
+
+  if(!S.seeded && !S.records.length) seedExamples();
+}
+
+/* 初回だけ、動きが分かるように見本を1件入れる */
+function seedExamples(){
+  S.seeded = true;
+  S.records.push({
+    id:"SAMPLE", sample:true, flow:"load", date:today(), vehicle:"【見本】1号車", site:"見本現場",
+    worker:"見本", startedAt:"08:12", endedAt:"08:26", status:"done", flags:[], items:[], answers:[],
+    durSec:840
+  });
+  save(); render();
+  toast("見本の記録を1件入れてあります。設定画面から消せます。");
+}
+
+/* ============================================================
+   チェックの実行
+   ============================================================ */
+let R = null; // 実行中セッション
+
+function startFlow(key){
+  const f = FLOWS[key];
+  R = { flow:key, date:today(), fields:{}, items:[], answers:[], flags:[], branch:{},
+        startMs:Date.now(), startedAt:hm(new Date()), i:-1 };
+  drawFields();
+}
+
+function shell(inner, opts={}){
+  runnerEl.innerHTML="";
+  const f = FLOWS[R.flow];
+  const steps = visibleSteps();
+  const box = el(`<div class="runner"><div class="runner-in">
+    <div class="rail">${steps.map((_,n)=>`<i class="${n<R.i?"done":(n===R.i?"now":"")}"></i>`).join("")}</div>
+    <div class="rbar">
+      <span class="flow">${f.name}</span>
+      <span class="step">${R.i>=0? `${R.i+1} / ${steps.length}` : "準備"}</span>
+      <button class="iconbtn x" id="quit">中止</button>
+    </div>
+    <div class="stage"></div></div></div>`);
+  box.querySelector(".stage").appendChild(inner);
+  box.querySelector("#quit").addEventListener("click",()=>{
+    if(confirm("チェックを中止します。ここまでの入力は記録されません。よろしいですか。")){ R=null; render(); }
+  });
+  runnerEl.appendChild(box);
+  window.scrollTo(0,0);
+}
+
+/* --- 入口：氏名・車番など --- */
+function drawFields(){
+  const f = FLOWS[R.flow];
+  const wrap = el(`<div style="display:flex;flex-direction:column;gap:16px">
+    <div><div class="qtag">${esc(f.name)}</div>
+    <h2 class="q" style="font-size:21px;margin-top:4px">${esc(f.lead)}</h2></div>
+    <div class="row" id="ff"></div>
+    <div class="acts"><button class="tapbtn pri" id="ok">チェックを始める</button></div></div>`);
+  const ff = wrap.querySelector("#ff");
+  f.fields.forEach(fd=>{
+    if(fd.kind==="choice"){
+      const l = el(`<div><label class="f" style="margin-bottom:5px">${esc(fd.label)}</label>
+        <div class="seg" data-k="${fd.k}">${fd.opts.map((o,i)=>
+          `<button type="button" data-v="${esc(o)}" aria-pressed="${i===0}">${esc(o)}</button>`).join("")}</div></div>`);
+      R.fields[fd.k] = fd.opts[0];
+      l.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{
+        l.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed","false"));
+        b.setAttribute("aria-pressed","true"); R.fields[fd.k]=b.dataset.v;
+      }));
+      ff.appendChild(l);
+    } else {
+      const dl = fd.list ? `list=dl_${fd.k}` : "";
+      const opts = fd.list ? `<datalist id="dl_${fd.k}">${(S[fd.list]||[]).map(v=>`<option value="${esc(v)}">`).join("")}</datalist>` : "";
+      const l = el(`<label class="f">${esc(fd.label)}
+        <input type="text" ${dl} placeholder="${esc(fd.ph||"")}" data-k="${fd.k}" autocomplete="off">${opts}</label>`);
+      ff.appendChild(l);
+    }
+  });
+  wrap.querySelector("#ok").addEventListener("click",()=>{
+    let bad = null;
+    wrap.querySelectorAll("input[data-k]").forEach(inp=>{
+      const v = inp.value.trim();
+      if(!v && !bad) bad = inp;
+      R.fields[inp.dataset.k] = v;
+    });
+    if(bad){ bad.focus(); toast("すべて入力してください。氏名を入れることが記録になります。"); return; }
+    if(R.flow==="depart" && R.fields.worker && R.fields.worker===R.fields.driver){
+      toast("積込者と運転者が同じです。二人で確認してください。"); return;
+    }
+    remember(); R.i=0; drawStep();
+  });
+  shell(wrap);
+}
+function remember(){
+  const put=(list,v)=>{ if(v && !S[list].includes(v)) S[list].unshift(v), S[list].splice(12); };
+  put("vehicles",R.fields.vehicle); put("sites",R.fields.site);
+  put("staff",R.fields.worker); put("staff",R.fields.driver);
+  save();
+}
+
+/* --- 分岐を踏まえた設問リスト --- */
+function visibleSteps(){
+  return FLOWS[R.flow].steps.filter(s=>{
+    if(!s.only) return true;
+    return Object.values(R.branch).includes(s.only);
+  });
+}
+
+/* --- 1問1画面 --- */
+function drawStep(){
+  const steps = visibleSteps();
+  if(R.i >= steps.length) return finish();
+  const s = steps[R.i];
+  const head = `<div class="qtag">${esc(s.tag||"確認")}</div><h2 class="q">${esc(s.q)}</h2>`;
+  const help = s.help ? `<div class="qhelp">${esc(s.help)}</div>` : "";
+  const why  = s.why  ? `<p class="why">起きたこと：${esc(s.why)}</p>` : "";
+  const wrap = el(`<div style="display:flex;flex-direction:column;gap:15px">
+    <div>${head}</div>${help}<div class="acts" id="acts"></div>${why}</div>`);
+  const acts = wrap.querySelector("#acts");
+
+  const answer = (val, note)=>{
+    R.answers.push({q:s.q, a:val, at:hm(new Date()), ms:Date.now(), note:note||""});
+    if(s.key) R.fields[s.key]=val;
+    R.i++; drawStep();
+  };
+  const blockOut = (msgHtml, val)=>{
+    R.answers.push({q:s.q, a:val, at:hm(new Date()), ms:Date.now()});
+    drawBlocked(msgHtml, val);
+  };
+
+  if(s.type==="hold"){
+    acts.appendChild(holdButton("押したままにする", "確認できたら、1.5秒 押し続けてください", ()=>answer("確認した")));
+    const nb = el(`<button class="tapbtn plain">まだできていない（後で戻る）</button>`);
+    nb.addEventListener("click",()=>{ R.flags.push("pending"); answer("未実施","要対応"); });
+    acts.appendChild(nb);
+  }
+  else if(s.type==="tap"){
+    const y = el(`<button class="tapbtn pri">はい、確認しました</button>`);
+    y.addEventListener("click",()=>answer("確認した"));
+    const n = el(`<button class="tapbtn neg">いいえ / できていない</button>`);
+    n.addEventListener("click",()=>{ R.flags.push("pending"); answer("未実施","要対応"); });
+    acts.append(y,n);
+    if(s.na){ const a=el(`<button class="tapbtn plain">この積荷には該当しない</button>`);
+      a.addEventListener("click",()=>answer("該当なし")); acts.appendChild(a); }
+  }
+  else if(s.type==="choice"){
+    s.opts.forEach(o=>{
+      const b = el(`<button class="tapbtn ${o.block?"neg":"pri"}">${esc(o.t)}</button>`);
+      b.addEventListener("click",()=>{
+        R.branch[s.q]=o.v;
+        if(o.block) return blockOut(o.block, o.v);
+        answer(o.v);
+      });
+      acts.appendChild(b);
+    });
+  }
+  else if(s.type==="count"){
+    const c = el(`<div style="display:flex;flex-direction:column;gap:13px">
+      <div class="pair">
+        <label class="f">${esc(s.tagA)}<input type="number" inputmode="numeric" min="0" id="a"></label>
+        <div class="eq">＝</div>
+        <label class="f">${esc(s.tagB)}<input type="number" inputmode="numeric" min="0" id="b"></label>
+      </div>
+      <div id="m"></div>
+      <button class="tapbtn pri" id="ok">この本数で確定する</button></div>`);
+    c.querySelector("#ok").addEventListener("click",()=>{
+      const a=c.querySelector("#a").value, b=c.querySelector("#b").value;
+      const m=c.querySelector("#m");
+      if(a===""||b===""){ m.innerHTML=`<div class="msg warn">両方の数を入れてください。</div>`; return; }
+      if(Number(a)!==Number(b)){
+        m.innerHTML=`<div class="msg stop"><b>本数が合っていません。</b><br>
+          必要 ${esc(a)}本 に対して ${esc(b)}本 しか掛かっていません。掛けてから入力し直してください。</div>`;
+        return;
+      }
+      answer(`${a}本（一致）`);
+    });
+    acts.appendChild(c);
+  }
+  else if(s.type==="text"){
+    const c = el(`<div style="display:flex;flex-direction:column;gap:12px">
+      <input type="text" id="t" placeholder="${esc(s.ph||"")}" autocomplete="off">
+      <button class="tapbtn pri" id="ok">入力して次へ</button></div>`);
+    c.querySelector("#ok").addEventListener("click",()=>{
+      const v=c.querySelector("#t").value.trim();
+      if(!v){ toast("入力してください。これが記録になります。"); return; }
+      answer(v);
+    });
+    acts.appendChild(c);
+  }
+  else if(s.type==="items"){
+    acts.appendChild(itemsPanel(()=>answer(`${R.items.length}品目 / 計${R.items.reduce((a,b)=>a+b.counted,0)}`)));
+  }
+  shell(wrap);
+}
+
+/* --- 長押しボタン --- */
+function holdButton(label, sub, done){
+  const b = el(`<button class="hold"><span class="fill"></span><span>${esc(label)}<small>${esc(sub)}</small></span></button>`);
+  const fill = b.querySelector(".fill");
+  let raf=null, t0=0, ok=false;
+  const stop=()=>{ if(raf) cancelAnimationFrame(raf); raf=null; if(!ok) fill.style.width="0%"; };
+  const step=()=>{
+    const p = Math.min(1,(Date.now()-t0)/HOLD_MS);
+    fill.style.width = (p*100)+"%";
+    if(p>=1){ ok=true; stop(); try{navigator.vibrate&&navigator.vibrate(40);}catch(e){} done(); return; }
+    raf=requestAnimationFrame(step);
+  };
+  b.addEventListener("pointerdown",e=>{ e.preventDefault(); if(ok) return; t0=Date.now(); raf=requestAnimationFrame(step); });
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,stop));
+  return b;
+}
+
+/* --- 品目カウンター（リスト数量 と 数えた数 の突き合わせ） --- */
+function itemsPanel(done){
+  const c = el(`<div style="display:flex;flex-direction:column;gap:12px">
+    <div class="itemlist" id="list"></div>
+    <div class="card" style="box-shadow:none"><div class="card-b" style="display:flex;flex-direction:column;gap:11px">
+      <label class="f">品名・型式<input type="text" id="nm" placeholder="例）鉄蓋 HS-2K60" autocomplete="off"></label>
+      <div class="pair">
+        <label class="f">リストの数量<input type="number" inputmode="numeric" min="0" id="a"></label>
+        <div class="eq">＝</div>
+        <label class="f">数えた数<input type="number" inputmode="numeric" min="0" id="b"></label>
+      </div>
+      <div id="m"></div>
+      <button class="tapbtn pri" id="add">この品を積んだ（登録）</button>
+    </div></div>
+    <button class="tapbtn plain" id="fin">すべて積み終えた → 次へ</button></div>`);
+  const list=c.querySelector("#list"), m=c.querySelector("#m");
+  const paint=()=>{
+    list.innerHTML="";
+    if(!R.items.length){ list.appendChild(el(`<p class="why" style="margin:0">まだ1品も登録されていません。1品積むごとに登録してください。</p>`)); return; }
+    R.items.forEach((it,i)=>{
+      const r=el(`<div class="item"><span class="nm">${esc(it.name)}</span>
+        <span class="qty">${it.counted}</span><button title="削除">×</button></div>`);
+      r.querySelector("button").addEventListener("click",()=>{ R.items.splice(i,1); paint(); });
+      list.appendChild(r);
+    });
+  };
+  c.querySelector("#add").addEventListener("click",()=>{
+    const nm=c.querySelector("#nm").value.trim(), a=c.querySelector("#a").value, b=c.querySelector("#b").value;
+    if(!nm){ m.innerHTML=`<div class="msg warn">品名・型式を入れてください。</div>`; return; }
+    if(a===""||b===""){ m.innerHTML=`<div class="msg warn">リストの数量と、数えた数の両方を入れてください。</div>`; return; }
+    if(Number(a)!==Number(b)){
+      m.innerHTML=`<div class="msg stop"><b>数が合っていません。</b><br>
+        リストは ${esc(a)}、数えた数は ${esc(b)} です。もう一度、指で数えてください。<br>
+        足りない分は置き場に残っています。</div>`;
+      return;
+    }
+    R.items.push({name:nm, listed:Number(a), counted:Number(b), at:hm(new Date())});
+    c.querySelector("#nm").value=""; c.querySelector("#a").value=""; c.querySelector("#b").value="";
+    m.innerHTML=`<div class="msg ok">${esc(nm)} を ${esc(b)} 登録しました。</div>`;
+    setTimeout(()=>{m.innerHTML="";},2200);
+    c.querySelector("#nm").focus(); paint();
+  });
+  c.querySelector("#fin").addEventListener("click",()=>{
+    if(!R.items.length){ m.innerHTML=`<div class="msg stop">1品も登録されていません。積んだ品を登録してください。</div>`; return; }
+    done();
+  });
+  paint();
+  return c;
+}
+
+/* --- ブロック（進ませない） --- */
+function drawBlocked(msgHtml, val){
+  const wrap = el(`<div style="display:flex;flex-direction:column;gap:16px">
+    <div><div class="qtag">ここで止めます</div>
+    <h2 class="q">このまま進めることはできません</h2></div>
+    <div class="msg stop" style="font-size:15px">${msgHtml}</div>
+    <p class="why">止めた記録は残ります。処置が終わったら、ホームからこのチェックをやり直してください。</p>
+    <div class="acts"><button class="tapbtn neg" id="ok">処置して、やり直す</button></div></div>`);
+  wrap.querySelector("#ok").addEventListener("click",()=>{
+    finish("blocked", val);
+  });
+  shell(wrap);
+}
+
+/* --- 完了 --- */
+function finish(status, blockedAt){
+  const now = new Date();
+  const durSec = Math.round((Date.now()-R.startMs)/1000);
+  const steps = visibleSteps().length || 1;
+  const flags = [...new Set(R.flags)];
+  if(status!=="blocked" && durSec < steps*FAST_SEC_PER_STEP) flags.push("fast");
+
+  const rec = {
+    id: newId(R.flow), flow:R.flow, date:R.date,
+    vehicle:R.fields.vehicle||"", site:R.fields.site||"", worker:R.fields.worker||"",
+    driver:R.fields.driver||"", when:R.fields.when||"",
+    startedAt:R.startedAt, endedAt:hm(now), durSec,
+    items:R.items, answers:R.answers.map(a=>({q:a.q,a:a.a,at:a.at,note:a.note||""})),
+    fields:{...R.fields}, flags, status: status||"done",
+    blockedAt: blockedAt||""
+  };
+  S.records.unshift(rec); save();
+  syncOne(rec);
+
+  if(rec.status==="blocked"){ R=null; view="home"; render(); return; }
+  drawCert(rec);
+}
+function newId(flow){
+  const p = {load:"A",lash:"B",depart:"C",close:"D"}[flow];
+  const n = S.records.filter(r=>r.date===today() && r.flow===flow).length + 1;
+  return `${today().replace(/-/g,"")}-${p}${pad(n)}`;
+}
+
+function drawCert(rec){
+  const f = FLOWS[rec.flow];
+  const fast = rec.flags.includes("fast");
+  const pend = rec.flags.includes("pending");
+  const wrap = el(`<div style="display:flex;flex-direction:column;gap:15px">
+    <div class="cert">
+      <div class="big">確認 完了</div>
+      <div class="no">${esc(rec.id)}</div>
+      <dl>
+        <dt>種別</dt><dd>${esc(f.name)}</dd>
+        ${rec.vehicle?`<dt>車番</dt><dd>${esc(rec.vehicle)}</dd>`:""}
+        ${rec.site?`<dt>現場</dt><dd>${esc(rec.site)}</dd>`:""}
+        <dt>実施者</dt><dd>${esc(rec.worker)}${rec.driver?` ／ ${esc(rec.driver)}`:""}</dd>
+        <dt>時刻</dt><dd>${esc(rec.startedAt)} → ${esc(rec.endedAt)}（${Math.floor(rec.durSec/60)}分${rec.durSec%60}秒）</dd>
+        ${rec.items.length?`<dt>数量</dt><dd>${rec.items.length}品目 計${rec.items.reduce((a,b)=>a+b.counted,0)}</dd>`:""}
+      </dl>
+    </div>
+    ${fast?`<div class="msg warn"><b>確認が速すぎます。</b><br>
+      ${Math.floor(rec.durSec/60)}分${rec.durSec%60}秒で ${rec.answers.length}項目に答えています。
+      現物を見ずに押した可能性があるため、記録に残しました。</div>`:""}
+    ${pend?`<div class="msg stop"><b>「できていない」項目があります。</b><br>
+      処置してから、このチェックをやり直してください。ホーム画面に赤で残ります。</div>`:""}
+    <p class="why">この画面を運転者に見せてください。記録番号と時刻が、渡した証拠になります。</p>
+    <div class="acts" id="acts"></div></div>`);
+  const acts = wrap.querySelector("#acts");
+  if(f.after==="timer"){
+    const b = el(`<button class="tapbtn pri">出発する → 増し締めタイマーを開始</button>`);
+    b.addEventListener("click",()=>{
+      const t = {id:"T"+Date.now(), vehicle:rec.vehicle, startMs:Date.now(),
+                 startedAt:hm(new Date()), date:today(), done:false, logs:[]};
+      S.timers.unshift(t); save(); R=null; openTimer(t.id);
+    });
+    acts.appendChild(b);
+  }
+  const rp = el(`<button class="tapbtn plain">上長へ報告する（コピーして LINE・メールに貼る）</button>`);
+  rp.addEventListener("click",()=>copyOut(reportText([rec]),"報告文をコピーしました"));
+  acts.appendChild(rp);
+  const h = el(`<button class="tapbtn plain">ホームに戻る</button>`);
+  h.addEventListener("click",()=>{ R=null; view="home"; render(); });
+  acts.appendChild(h);
+  shell(wrap);
+}
+
+/* ============================================================
+   増し締めタイマー（走り出して5〜10分／以降2時間ごと）
+   ============================================================ */
+let tint = null;
+function openTimer(id){
+  const t = S.timers.find(x=>x.id===id); if(!t) return render();
+  runnerEl.innerHTML="";
+  const box = el(`<div class="runner"><div class="runner-in">
+    <div class="rbar"><span class="flow">増し締め</span><span class="step">${esc(t.vehicle)}</span>
+      <button class="iconbtn x" id="back">閉じる</button></div>
+    <div class="stage">
+      <div><div class="qtag" id="tag">走行中</div>
+      <h2 class="q" id="q">走り出して5〜10分で、必ず止まって増し締めします</h2></div>
+      <div class="clock" id="clk">0:00</div>
+      <div class="qhelp" id="hint">ポリエステル製のベルトは初回荷重で伸びます。走り出しで張力は必ず落ちます。
+        路肩など安全な場所に停めてから、全本を増し締めしてください。</div>
+      <div class="acts">
+        <div id="hold"></div>
+        <button class="tapbtn plain" id="fin">到着した → タイマーを終了</button>
+      </div>
+      <div id="logs"></div>
+    </div></div></div>`);
+  runnerEl.appendChild(box);
+
+  const paintLogs=()=>{
+    const l = box.querySelector("#logs");
+    l.innerHTML = t.logs.length
+      ? `<div class="card" style="box-shadow:none"><div class="card-b">
+          <div class="eyebrow" style="margin-bottom:6px">増し締めの記録</div>
+          ${t.logs.map(x=>`<div class="rec"><span class="t">${esc(x.at)}</span>
+            <span class="m"><b>増し締め実施</b><div>${esc(x.place||"場所の入力なし")}</div></span></div>`).join("")}
+        </div></div>`
+      : "";
+  };
+  box.querySelector("#hold").appendChild(
+    holdButton("増し締めした", "全本を締め直したら、1.5秒 押し続けてください", ()=>{
+      const place = prompt("停めた場所を入力してください（任意）","") || "";
+      t.logs.unshift({at:hm(new Date()), ms:Date.now(), place});
+      save(); paintLogs(); toast("増し締めを記録しました。次は2時間後です。");
+    }));
+  box.querySelector("#fin").addEventListener("click",()=>{
+    if(!t.logs.length && !confirm("一度も増し締めを記録していません。本当に終了しますか。")) return;
+    t.done=true; t.endedAt=hm(new Date()); save(); view="home"; render();
+  });
+  box.querySelector("#back").addEventListener("click",()=>{ view="home"; render(); });
+  paintLogs();
+
+  if(tint) clearInterval(tint);
+  const upd=()=>{
+    const cur = S.timers.find(x=>x.id===id); if(!cur||cur.done){ clearInterval(tint); return; }
+    const last = cur.logs.length ? cur.logs[0].ms : cur.startMs;
+    const sec = Math.floor((Date.now()-last)/1000);
+    const clk = box.querySelector("#clk"); if(!clk) { clearInterval(tint); return; }
+    clk.textContent = `${Math.floor(sec/60)}:${pad(sec%60)}`;
+    const first = cur.logs.length===0;
+    const due = first ? sec>=300 : sec>=7200;
+    clk.classList.toggle("due", due);
+    box.querySelector("#tag").textContent = due ? "今すぐ止まる" : "走行中";
+    box.querySelector("#q").textContent = first
+      ? (due ? "止まってください。今が増し締めの時間です" : "走り出して5〜10分で、必ず止まって増し締めします")
+      : (due ? "2時間経ちました。休憩して増し締めしてください" : "次の増し締めまで走行できます（2時間ごと）");
+  };
+  upd(); tint = setInterval(upd,1000);
+}
+function tickTimers(){
+  const upd=()=>{
+    document.querySelectorAll(".tmr").forEach(n=>{
+      const t = S.timers.find(x=>x.id===n.dataset.id); if(!t) return;
+      const last = t.logs.length ? t.logs[0].ms : t.startMs;
+      const sec = Math.floor((Date.now()-last)/1000);
+      const due = t.logs.length ? sec>=7200 : sec>=300;
+      n.textContent = due
+        ? `▲ 増し締めの時間です（${Math.floor(sec/60)}分経過）`
+        : `${t.logs.length? "前回の増し締めから":"出発から"} ${Math.floor(sec/60)}分${pad(sec%60)}秒`;
+      n.style.color = due ? "var(--stop)" : "";
+      n.style.fontWeight = due ? "700" : "";
+    });
+  };
+  upd(); setInterval(upd,1000);
+}
+
+/* ============================================================
+   記録
+   ============================================================ */
+let recFilter = "all";
+function renderRecords(){
+  const back = el(`<button class="btn ghost" style="justify-content:flex-start">← ホームに戻る</button>`);
+  back.addEventListener("click",()=>{view="home";render();});
+  app.appendChild(back);
+
+  const seg = el(`<div class="seg">
+    ${[["all","すべて"],["load","積込"],["lash","固縛"],["depart","出発前"],["close","終業前"]]
+      .map(([k,t])=>`<button data-k="${k}" aria-pressed="${recFilter===k}">${t}</button>`).join("")}</div>`);
+  seg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{recFilter=b.dataset.k;render();}));
+  app.appendChild(seg);
+
+  if(!storageOK) watchCloud("all");
+  const base = (!storageOK && dbState==="on") ? (cloudSub.rows||[]) : S.records;
+  const list = recFilter==="all" ? base : base.filter(r=>r.flow===recFilter);
+  const byDate = {};
+  list.forEach(r=>{ (byDate[r.date] ||= []).push(r); });
+
+  if(!list.length) app.appendChild(el(`<div class="card"><div class="card-b sub">まだ記録がありません。</div></div>`));
+
+  Object.keys(byDate).sort().reverse().forEach(d=>{
+    const c = el(`<div class="card"><div class="card-h"><div class="eyebrow">${d.replace(/-/g,".")}</div>
+      <div class="ttl">${jpDate(d)}</div>
+      <div style="margin-left:auto;font-size:12.5px;color:var(--ink3)">${byDate[d].length}件</div></div>
+      <div class="card-b" id="l"></div></div>`);
+    const L = c.querySelector("#l");
+    byDate[d].sort((a,b)=>(b.endedAt||"").localeCompare(a.endedAt||"")).forEach(r=>{
+      const tag = r.status==="blocked" ? `<span class="chip off">止めた</span>`
+        : r.flags.includes("pending") ? `<span class="chip off">未対応あり</span>`
+        : r.flags.includes("fast") ? `<span class="chip flag">確認が速すぎ</span>`
+        : `<span class="chip on">完了</span>`;
+      const row = el(`<div class="rec"><span class="t">${esc(r.endedAt||"--:--")}</span>
+        <span class="m"><b>${esc(FLOWS[r.flow].name)}</b> ${tag}
+          <div>${esc([r.vehicle,r.site,r.worker&&(r.worker+(r.driver?" / "+r.driver:""))].filter(Boolean).join("　"))}</div>
+          ${r.blockedAt?`<div style="color:var(--stop)">止めた理由：${esc(r.blockedAt)}</div>`:""}
+          ${r.sample?`<div style="color:var(--warn)">※これは動作を見せるための見本です</div>`:""}
+          <button class="iconbtn" style="margin-top:6px" data-id="${r.id}">中身を見る</button>
+        </span></div>`);
+      row.querySelector("button").addEventListener("click",()=>showDetail(r));
+      L.appendChild(row);
+    });
+    app.appendChild(c);
+  });
+
+  const rep = el(`<div class="card"><div class="card-h"><div class="eyebrow">Report</div>
+    <div class="ttl">上長へ渡す</div></div><div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+    <p class="sub" style="margin:0" id="rn"></p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="tapbtn plain" id="rt" style="flex:1;min-width:150px">本日の報告文をコピー</button>
+      <button class="tapbtn plain" id="ra" style="flex:1;min-width:150px">表示中すべての報告文</button>
+    </div>
+    <button class="tapbtn pri" id="rc">記録コードをコピー（上長の閲覧モード用）</button>
+    </div></div>`);
+  rep.querySelector("#rn").innerHTML = dbState==="on"
+    ? `記録は上長へ<b>自動で共有されています</b>。ここを使う必要はありません。<br>
+       LINE で一言そえたいときだけ<b>報告文</b>を、共有が止まったときだけ<b>記録コード</b>を使ってください。`
+    : `<b>報告文</b>は、そのまま LINE やメールに貼って送る文章です。上長は読むだけで済みます。<br>
+       <b>記録コード</b>は、上長の「閲覧モード」に貼り付けると一覧・集計として見られるデータです。`;
+  rep.querySelector("#rt").addEventListener("click",()=>{
+    const t = list.filter(r=>r.date===today() && !r.sample);
+    if(!t.length) return toast("本日の記録がありません");
+    copyOut(reportText(t),"本日の報告文をコピーしました");
+  });
+  rep.querySelector("#ra").addEventListener("click",()=>{
+    const t = list.filter(r=>!r.sample);
+    if(!t.length) return toast("記録がありません");
+    copyOut(reportText(t),"報告文をコピーしました");
+  });
+  rep.querySelector("#rc").addEventListener("click",()=>{
+    const t = list.filter(r=>!r.sample);
+    if(!t.length) return toast("記録がありません");
+    copyOut(pack(t), `記録コードをコピーしました（${t.length}件）`);
+  });
+  app.appendChild(rep);
+
+  const out = el(`<div class="card"><div class="card-h"><div class="eyebrow">Export</div>
+    <div class="ttl">記録表として出す</div></div><div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+    <p class="sub" style="margin:0">下の枠の中身をコピーして、Excel やメールに貼り付けてください。
+      1行が1チェックです。印刷ボタンでそのまま紙の記録表にもなります。</p>
+    <textarea id="csv" readonly></textarea>
+    <div style="display:flex;gap:8px">
+      <button class="tapbtn plain" id="cp" style="flex:1">全部選択する</button>
+      <button class="tapbtn plain" id="pr" style="flex:1">印刷する</button>
+    </div></div></div>`);
+  out.querySelector("#csv").value = toCSV(list);
+  out.querySelector("#cp").addEventListener("click",()=>{
+    const t=out.querySelector("#csv"); t.focus(); t.select();
+    try{ document.execCommand("copy"); toast("コピーしました"); }
+    catch(e){ toast("選択しました。長押しでコピーしてください"); }
+  });
+  out.querySelector("#pr").addEventListener("click",()=>{ try{ window.print(); }catch(e){ toast("印刷できませんでした"); } });
+  app.appendChild(out);
+}
+
+function toCSV(list){
+  const h = ["日付","記録番号","種別","車番","現場","実施者","運転者","開始","終了","所要秒","状態","注記","品目"];
+  const rows = list.filter(r=>!r.sample).map(r=>[
+    r.date, r.id, FLOWS[r.flow].name, r.vehicle, r.site, r.worker, r.driver,
+    r.startedAt, r.endedAt, r.durSec,
+    r.status==="blocked"?"止めた":(r.flags.includes("pending")?"未対応あり":(r.flags.includes("fast")?"完了(確認が速すぎ)":"完了")),
+    r.blockedAt||"",
+    (r.items||[]).map(i=>`${i.name}x${i.counted}`).join(" / ")
+  ]);
+  return [h, ...rows].map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+}
+
+function showDetail(r){
+  runnerEl.innerHTML="";
+  const f = FLOWS[r.flow];
+  const box = el(`<div class="runner"><div class="runner-in">
+    <div class="rbar"><span class="flow">${esc(f.name)}</span><span class="step">${esc(r.id)}</span>
+      <button class="iconbtn x" id="back">閉じる</button></div>
+    <div class="stage" style="justify-content:flex-start;gap:13px">
+      <div class="card"><div class="card-b">
+        <dl style="display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0;font-size:13.5px">
+          <dt style="color:var(--ink3)">日付</dt><dd style="margin:0;font-weight:700">${esc(jpDate(r.date))}</dd>
+          ${r.vehicle?`<dt style="color:var(--ink3)">車番</dt><dd style="margin:0;font-weight:700">${esc(r.vehicle)}</dd>`:""}
+          ${r.site?`<dt style="color:var(--ink3)">現場</dt><dd style="margin:0;font-weight:700">${esc(r.site)}</dd>`:""}
+          <dt style="color:var(--ink3)">実施者</dt><dd style="margin:0;font-weight:700">${esc(r.worker)}${r.driver?" ／ "+esc(r.driver):""}</dd>
+          <dt style="color:var(--ink3)">時刻</dt><dd style="margin:0;font-weight:700">${esc(r.startedAt)} → ${esc(r.endedAt)}</dd>
+        </dl></div></div>
+      ${r.items&&r.items.length?`<div class="card"><div class="card-b">
+        <div class="eyebrow" style="margin-bottom:7px">積んだ品（リスト数量＝数えた数）</div>
+        <div class="itemlist">${r.items.map(i=>`<div class="item"><span class="nm">${esc(i.name)}</span>
+          <span class="qty">${i.counted}</span><span style="color:var(--ink3);font-size:12px">${esc(i.at||"")}</span></div>`).join("")}</div>
+        </div></div>`:""}
+      <div class="card"><div class="card-b">
+        <div class="eyebrow" style="margin-bottom:5px">答えた内容と時刻</div>
+        ${(r.answers||[]).map(a=>`<div class="rec"><span class="t">${esc(a.at)}</span>
+          <span class="m"><b>${esc(a.a)}</b><div>${esc(a.q)}</div>
+          ${a.note?`<div style="color:var(--stop)">${esc(a.note)}</div>`:""}</span></div>`).join("")
+          || `<p class="sub" style="margin:0">記録なし</p>`}
+      </div></div>
+    </div></div></div>`);
+  box.querySelector("#back").addEventListener("click",()=>render());
+  runnerEl.appendChild(box);
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   設定
+   ============================================================ */
+function renderSetup(){
+  const back = el(`<button class="btn ghost" style="justify-content:flex-start">← ホームに戻る</button>`);
+  back.addEventListener("click",()=>{view="home";render();});
+  app.appendChild(back);
+
+  app.appendChild(el(`<div class="card"><div class="card-h"><div class="eyebrow">Setup</div>
+    <div class="ttl">使い方</div></div><div class="card-b sub" style="display:flex;flex-direction:column;gap:9px">
+    <p style="margin:0"><b>1. 積込</b>　品物を積みながら、1品ごとに登録します。リストの数量と数えた数が合わないと登録できません。</p>
+    <p style="margin:0"><b>2. 固縛</b>　ベルトを掛けたら、現物を触りながら10項目に答えます。</p>
+    <p style="margin:0"><b>3. 出発前</b>　積込者と運転者、二人でこの画面を見ながら答えます。終わると増し締めタイマーが始まります。</p>
+    <p style="margin:0"><b>4. 終業前</b>　事務・出荷係が1日1回、伝票ラックと置き場の空確認をします。</p>
+    <hr class="hr">
+    <p style="margin:0">答えた<b>時刻がすべて自動で残ります</b>。現物を見ずに連打すると「確認が速すぎ」と記録に出ます。</p>
+    <p style="margin:0"><b>上長の方へ</b>　ホーム画面いちばん下の「閲覧モード」を開いてください。担当者がチェックを終えるたびに記録が自動で集まり、実施状況・所要時間・気になる記録がまとめて見られます。閲覧モードから記録を作ったり書き換えたりはできません。</p>
+    <p style="margin:0"><b>自動共有について</b>　同じリンクを全員が使います。電波がないところでもチェックはできて、つながったときに自動で送られます。ホーム画面の上に「まだ送っていない記録」と出たら、電波の届く場所で「いま送る」を押してください。</p>
+    <p style="margin:0">記録はこの端末にも必ず残ります。大事な記録は「記録」画面からコピーして Excel に貼り付けて保管してください。</p>
+    </div></div>`));
+
+  ["vehicles","staff","sites"].forEach(k=>{
+    const label = {vehicles:"よく使う車番", staff:"よく使う氏名", sites:"よく使う現場名"}[k];
+    const c = el(`<div class="card"><div class="card-h"><div class="ttl">${label}</div></div>
+      <div class="card-b" style="display:flex;flex-direction:column;gap:9px">
+      <div class="chips" id="cs"></div>
+      <div style="display:flex;gap:8px"><input type="text" id="nv" placeholder="追加して Enter">
+      <button class="tapbtn plain" id="ad" style="width:auto;padding:12px 16px">追加</button></div></div></div>`);
+    const paint=()=>{
+      const cs=c.querySelector("#cs"); cs.innerHTML="";
+      if(!S[k].length) cs.appendChild(el(`<span class="sub">未登録</span>`));
+      S[k].forEach((v,i)=>{
+        const ch=el(`<span class="chip wait" style="font-size:13px;padding:6px 9px">${esc(v)} <button style="border:none;background:none;color:var(--ink3);cursor:pointer;font-family:inherit">×</button></span>`);
+        ch.querySelector("button").addEventListener("click",()=>{S[k].splice(i,1);save();paint();});
+        cs.appendChild(ch);
+      });
+    };
+    const add=()=>{ const v=c.querySelector("#nv").value.trim(); if(!v)return;
+      if(!S[k].includes(v)) S[k].unshift(v); c.querySelector("#nv").value=""; save(); paint(); };
+    c.querySelector("#ad").addEventListener("click",add);
+    c.querySelector("#nv").addEventListener("keydown",e=>{ if(e.key==="Enter") add(); });
+    paint(); app.appendChild(c);
+  });
+
+  const danger = el(`<div class="card"><div class="card-h"><div class="ttl">データ</div></div>
+    <div class="card-b" style="display:flex;flex-direction:column;gap:9px">
+    <button class="tapbtn plain" id="ds">見本の記録を消す</button>
+    <button class="tapbtn neg" id="dz">すべての記録を消す</button>
+    <p class="why" style="margin:0">消す前に「記録」画面からコピーして保管してください。元に戻せません。</p></div></div>`);
+  danger.querySelector("#ds").addEventListener("click",()=>{
+    S.records = S.records.filter(r=>!r.sample); save(); toast("見本を消しました"); render();
+  });
+  danger.querySelector("#dz").addEventListener("click",()=>{
+    if(confirm("すべての記録を消します。元に戻せません。よろしいですか。")){
+      S.records=[]; S.timers=[]; save(); toast("すべて消しました"); render();
+    }
+  });
+  app.appendChild(danger);
+}
+
+/* ============================================================
+   上長への自動共有（Googleスプレッドシート）
+   記録はまず端末に保存し、そのあとスプレッドシートへ送る。
+   電波がなくても作業は止まらず、つながったときにまとめて送られる。
+   ============================================================ */
+const API_URL   = "https://script.google.com/macros/s/AKfycbxRb2cDAGzWGqgbe1mAhTaMxP1A08zlk5-x9vDGv7GqyvCXfm4ovSCo1UO7iMyq5TZwVg/exec";
+const API_TOKEN = "2026shukka-kiroku";
+
+let dbState  = "connecting";                  // connecting / on / off
+let cloudSub = { key:null, rows:[], loading:false, err:null, at:0 };
+let pushing  = false, cloudTimer = null;
+
+function softRender(){ if(!R) render(); }     // チェック実行中は画面を触らない
+function daysAgo(n){ const d = new Date(); d.setDate(d.getDate()-n); return ymd(d); }
+
+/* スプレッドシートに置いた形（Apps Script）から開いたときは google.script.run が使える。
+   別の場所に置いたときは、ふつうの通信で同じ処理を呼ぶ。 */
+const hasGS = () => !!(window.google && window.google.script && window.google.script.run);
+
+function apiCall(fn, payload){
+  const p = Object.assign({ token:API_TOKEN }, payload||{});
+  if(hasGS()){
+    return new Promise((res, rej)=>{
+      try{ window.google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](p); }
+      catch(e){ rej(e); }
+    });
+  }
+  if(fn === "apiList"){
+    const u = API_URL + "?api=1&token=" + encodeURIComponent(API_TOKEN)
+            + (p.from ? "&from=" + encodeURIComponent(p.from) : "");
+    return fetch(u).then(r=>r.json());
+  }
+  return fetch(API_URL, { method:"POST", body: JSON.stringify(Object.assign({fn}, p)) })
+         .then(r=>r.json());
+}
+
+function cloudRecord(r){
+  return {
+    id:r.id, flow:r.flow, flowName:(FLOWS[r.flow]||{}).name || r.flow, date:r.date,
+    vehicle:r.vehicle||"", site:r.site||"", worker:r.worker||"", driver:r.driver||"",
+    startedAt:r.startedAt||"", endedAt:r.endedAt||"", durSec:r.durSec||0,
+    status:r.status||"done", flags:r.flags||[], blockedAt:r.blockedAt||"",
+    items:(r.items||[]).map(i=>({name:String(i.name||""), listed:Number(i.listed||0),
+                                 counted:Number(i.counted||0), at:i.at||""})),
+    answers:(r.answers||[]).map(a=>({q:a.q||"", a:a.a||"", at:a.at||"", note:a.note||""})),
+    fields:r.fields||{}
+  };
+}
+
+function unsentCount(){ return S.records.filter(r=>!r.sample && !r.synced).length; }
+
+async function initDB(){
+  try{
+    const r = await apiCall("apiList", { from: daysAgo(0), ping:1 });
+    dbState = (r && r.ok) ? "on" : "off";
+  }catch(e){ dbState = "off"; }
+  softRender();
+  if(dbState === "on") pushPending(true);
+}
+
+async function syncOne(rec){
+  if(dbState !== "on" || rec.sample) return false;
+  try{
+    const r = await apiCall("apiPush", { records:[cloudRecord(rec)] });
+    if(r && r.ok){ rec.synced = true; save(); softRender(); return true; }
+  }catch(e){}
+  return false;
+}
+
+async function pushPending(quiet){
+  if(pushing) return;
+  if(dbState !== "on"){ if(!quiet) toast("いま送れませんでした。電波の届く場所でもう一度お試しください。"); return; }
+  pushing = true;
+  let sent = 0, bad = "";
+  try{
+    const todo = S.records.filter(r=>!r.sample && !r.synced);
+    if(todo.length){
+      const r = await apiCall("apiPush", { records: todo.map(cloudRecord) });
+      if(r && r.ok){ todo.forEach(x=>x.synced = true); sent = todo.length; save(); }
+      else bad = (r && r.error) || "ng";
+    }
+  }catch(e){ bad = "ng"; }
+  finally{ pushing = false; }
+  if(!quiet){
+    if(bad === "gotoba") toast("合言葉が合いません。上長に連絡してください。");
+    else if(bad)         toast("いま送れませんでした。電波の届く場所でもう一度お試しください。");
+    else if(sent)        toast(`${sent}件を上長へ送りました`);
+    else                 toast("送っていない記録はありません");
+  }
+  softRender();
+}
+
+/* 閲覧モードの読み込み。範囲が変わったときと、1分ごとに取り直す */
+function watchCloud(range){
+  if(dbState !== "on") return;
+  const now = Date.now();
+  if(cloudSub.key === range && now - cloudSub.at < 45000) return;
+  cloudSub.key = range; cloudSub.at = now; cloudSub.loading = true;
+  const from = range === "all" ? "" : daysAgo(range === "today" ? 0 : 6);
+  apiCall("apiList", { from })
+    .then(r=>{
+      if(r && r.ok){
+        cloudSub.rows = (r.records||[]).filter(x=>x && x.id && FLOWS[x.flow]);
+        cloudSub.err = null;
+      } else cloudSub.err = (r && r.error) || "ng";
+      cloudSub.loading = false; softRender();
+    })
+    .catch(()=>{ cloudSub.loading = false; cloudSub.err = "ng"; softRender(); });
+  if(cloudTimer) clearInterval(cloudTimer);
+  cloudTimer = setInterval(()=>{
+    if(!R && (view === "watch" || !storageOK)){ cloudSub.at = 0; watchCloud(cloudSub.key); }
+  }, 60000);
+}
+
+/* 自動で集まった記録と、貼り付けで読み込んだ記録を1つにまとめる */
+function allWatchRows(){
+  const m = new Map();
+  W.forEach(r=>{ if(r && r.id) m.set(r.id, r); });
+  (cloudSub.rows||[]).forEach(r=>{ if(r && r.id) m.set(r.id, r); });
+  return [...m.values()];
+}
+
+async function deleteCloud(ids){
+  try{ const r = await apiCall("apiDelete", { ids }); return (r && r.ok) ? (r.deleted||0) : 0; }
+  catch(e){ return 0; }
+}
+
+/* ============================================================
+   上長へ渡す ── 報告文・記録コード
+   ============================================================ */
+function copyOut(text, okMsg){
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.cssText = "position:fixed;left:0;top:0;opacity:0.01;width:100%;height:120px";
+  document.body.appendChild(ta);
+  ta.focus(); ta.select(); try{ ta.setSelectionRange(0, text.length); }catch(e){}
+  let ok = false;
+  try{ ok = document.execCommand("copy"); }catch(e){}
+  ta.remove();
+  if(ok){ toast(okMsg); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>toast(okMsg)).catch(()=>showManual(text));
+  } else showManual(text);
+}
+function showManual(text){
+  runnerEl.innerHTML="";
+  const box = el(`<div class="runner"><div class="runner-in">
+    <div class="rbar"><span class="flow">コピーしてください</span><button class="iconbtn x" id="back">閉じる</button></div>
+    <div class="stage" style="justify-content:flex-start;gap:12px">
+      <p class="sub" style="margin:0">自動でコピーできませんでした。下の枠を長押しして「すべて選択」→「コピー」してください。</p>
+      <textarea id="t" readonly style="min-height:340px"></textarea></div></div></div>`);
+  box.querySelector("#t").value = text;
+  box.querySelector("#back").addEventListener("click",()=>render());
+  runnerEl.appendChild(box);
+  const t = box.querySelector("#t"); t.focus(); t.select();
+}
+
+function statusJP(r){
+  if(r.status==="blocked") return "止めた（未完了）";
+  if((r.flags||[]).includes("pending")) return "完了（できていない項目あり）";
+  if((r.flags||[]).includes("fast")) return "完了（確認が速すぎ）";
+  return "完了";
+}
+function reportText(list){
+  const byDate = {};
+  list.forEach(r=>{ (byDate[r.date] ||= []).push(r); });
+  const out = [];
+  Object.keys(byDate).sort().reverse().forEach(d=>{
+    const rs = byDate[d].slice().sort((a,b)=>(a.endedAt||"").localeCompare(b.endedAt||""));
+    out.push(`【出荷チェック報告】${jpDate(d)}`);
+    rs.forEach(r=>{
+      out.push("──────────");
+      out.push(`■ ${FLOWS[r.flow].name}　${r.startedAt}→${r.endedAt}（${Math.floor(r.durSec/60)}分${r.durSec%60}秒）`);
+      if(r.vehicle) out.push(`車番：${r.vehicle}`);
+      if(r.site)    out.push(`現場：${r.site}`);
+      out.push(`実施者：${r.worker}${r.driver?`　運転者：${r.driver}`:""}`);
+      if(r.items && r.items.length)
+        out.push(`品目：${r.items.map(i=>`${i.name}×${i.counted}`).join(" / ")}`);
+      if(r.fields && r.fields.leftover) out.push(`残っていた伝票：${r.fields.leftover}`);
+      if(r.fields && r.fields.procitem) out.push(`明日の加工品：${r.fields.procitem}`);
+      out.push(`結果：${statusJP(r)}　記録番号 ${r.id}`);
+      if(r.blockedAt) out.push(`止めた理由：${r.blockedAt}`);
+      (r.answers||[]).filter(a=>a.a==="未実施").forEach(a=>out.push(`※できていない：${a.q}`));
+    });
+    out.push("──────────");
+    out.push(`合計 ${rs.length}件`);
+    out.push("");
+  });
+  return out.join("\n").trim();
+}
+
+/* 記録コード（閲覧モードで読み込む用）。質問文は載せず、回答と時刻だけを持たせて短くする */
+function pack(list){
+  const c = list.map(r=>({
+    i:r.id, f:r.flow, d:r.date, v:r.vehicle||"", s:r.site||"", w:r.worker||"", r2:r.driver||"",
+    a:r.startedAt, b:r.endedAt, u:r.durSec||0, t:r.status||"done", g:r.flags||[], x:r.blockedAt||"",
+    q:(r.items||[]).map(i=>[i.name,i.counted]),
+    k:(r.answers||[]).map(a=>[a.a,a.at]),
+    e:{leftover:(r.fields||{}).leftover||"", procitem:(r.fields||{}).procitem||""}
+  }));
+  return "SS1:" + btoa(unescape(encodeURIComponent(JSON.stringify(c))));
+}
+function unpack(code){
+  const s = String(code).trim().replace(/\s+/g,"");
+  const i = s.indexOf("SS1:");
+  if(i < 0) throw new Error("形式が違います");
+  const arr = JSON.parse(decodeURIComponent(escape(atob(s.slice(i+4)))));
+  if(!Array.isArray(arr)) throw new Error("中身が読めません");
+  return arr.map(c=>({
+    id:c.i, flow:c.f, date:c.d, vehicle:c.v, site:c.s, worker:c.w, driver:c.r2,
+    startedAt:c.a, endedAt:c.b, durSec:c.u, status:c.t, flags:c.g||[], blockedAt:c.x||"",
+    items:(c.q||[]).map(x=>({name:x[0],counted:x[1]})),
+    answers:(c.k||[]).map(x=>({a:x[0],at:x[1],q:""})),
+    fields:c.e||{}
+  })).filter(r=>r.id && FLOWS[r.flow]);
+}
+
+/* ============================================================
+   閲覧モード（上長） ── 読むだけ。ここから記録は作れない
+   ============================================================ */
+let W = loadW(), wRange = "week";
+function loadW(){ try{ const r=localStorage.getItem(WKEY); if(r) return JSON.parse(r); }catch(e){} return []; }
+function saveW(){ try{ localStorage.setItem(WKEY, JSON.stringify(W)); }catch(e){ toast("保存できませんでした"); } }
+
+function renderWatch(){
+  const back = el(`<button class="btn ghost" style="justify-content:flex-start">← 担当者の画面に戻る</button>`);
+  back.addEventListener("click",()=>{view="home";render();});
+  app.appendChild(back);
+
+  watchCloud(wRange);
+
+  app.appendChild(el(`<div class="card"><div class="card-h"><div class="mark" style="width:26px;height:26px;font-size:14px">見</div>
+    <div><div class="ttl">閲覧モード</div><div class="sub" style="font-size:12.5px">読むだけの画面です。ここから記録は作れません</div></div></div>
+    <div class="card-b sub" style="padding-top:11px">${
+      dbState==="on" ? "担当者がチェックを終えるたび、この画面に自動で集まります。開いたままにしておけば、そのまま増えていきます。"
+      : dbState==="connecting" ? "つないでいます…"
+      : "自動共有につながっていません。担当者に「記録コードをコピー」してもらい、LINE やメールで送ってもらって、下の枠に貼り付けてください。"
+    }</div></div>`));
+
+  const imp = el(`<div class="card"><div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+    <textarea id="src" placeholder="ここに記録コード（SS1:… で始まる長い文字列）を貼り付ける" style="min-height:100px"></textarea>
+    <div id="m"></div>
+    <button class="tapbtn pri" id="go">読み込む</button></div></div>`);
+  imp.querySelector("#go").addEventListener("click",()=>{
+    const m = imp.querySelector("#m");
+    const v = imp.querySelector("#src").value;
+    if(!v.trim()){ m.innerHTML=`<div class="msg warn">記録コードを貼り付けてください。</div>`; return; }
+    let rows;
+    try{ rows = unpack(v); }
+    catch(e){ m.innerHTML=`<div class="msg stop"><b>読み込めませんでした。</b><br>
+      「SS1:」で始まる記録コードを、途中で切らずに全部貼り付けてください。</div>`; return; }
+    let add=0;
+    rows.forEach(r=>{ if(!W.some(x=>x.id===r.id)){ W.push(r); add++; } });
+    saveW();
+    toast(add ? `${add}件 読み込みました` : "新しい記録はありませんでした");
+    render();
+  });
+  if(dbState !== "on") app.appendChild(imp);
+
+  if(!allWatchRows().length){
+    app.appendChild(el(`<div class="card"><div class="card-b sub">まだ何も読み込まれていません。</div></div>`));
+    app.appendChild(el(`<p class="foot">読み込んだ記録は、この端末の閲覧モードにだけ貯まります。</p>`));
+    return;
+  }
+
+  const seg = el(`<div class="seg">${[["today","本日"],["week","直近7日"],["all","すべて"]]
+    .map(([k,t])=>`<button data-k="${k}" aria-pressed="${wRange===k}">${t}</button>`).join("")}</div>`);
+  seg.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{wRange=b.dataset.k;render();}));
+  app.appendChild(seg);
+
+  const from = new Date(); from.setDate(from.getDate()-6);
+  const rows = allWatchRows().filter(r=> wRange==="all" ? true : wRange==="today" ? r.date===today() : r.date>=ymd(from))
+                .sort((a,b)=> (b.date+b.endedAt).localeCompare(a.date+a.endedAt));
+
+  if(!rows.length){
+    app.appendChild(el(`<div class="card"><div class="card-b sub">この期間の記録はありません。</div></div>`));
+    return;
+  }
+
+  const fast    = rows.filter(r=>(r.flags||[]).includes("fast"));
+  const pending = rows.filter(r=>(r.flags||[]).includes("pending"));
+  const blocked = rows.filter(r=>r.status==="blocked");
+  const gaps = [];
+  [...new Set(rows.map(r=>r.date))].forEach(d=>{
+    const day = rows.filter(r=>r.date===d);
+    [...new Set(day.filter(r=>r.vehicle).map(r=>r.vehicle))].forEach(v=>{
+      const has = k=>day.some(r=>r.vehicle===v && r.flow===k && r.status==="done");
+      if(has("load") && !has("lash"))   gaps.push([d,v,"固縛チェック"]);
+      if(has("load") && !has("depart")) gaps.push([d,v,"出発前チェック"]);
+    });
+  });
+
+  const alertCard = el(`<div class="card"><div class="card-h"><div class="eyebrow">Watch</div>
+    <div class="ttl">気をつけて見るところ</div></div>
+    <div class="card-b" style="display:flex;flex-direction:column;gap:9px" id="a"></div></div>`);
+  const A = alertCard.querySelector("#a");
+  const line = (cls,ic,title,body)=>A.appendChild(el(
+    `<div class="alert ${cls}"><div class="ic">${ic}</div><div><b>${title}</b>${body}</div></div>`));
+  if(blocked.length) line("stop","止",`途中で止まった記録 ${blocked.length}件`,
+    blocked.map(r=>`${esc(r.date.slice(5))} ${esc(r.vehicle||FLOWS[r.flow].name)}：${esc(r.blockedAt||"")}`).join("<br>"));
+  if(pending.length) line("stop","未",`「できていない」項目が残っている記録 ${pending.length}件`,
+    pending.map(r=>`${esc(r.date.slice(5))} ${esc(FLOWS[r.flow].name)}／${esc(r.worker)}${r.vehicle?`（${esc(r.vehicle)}）`:""}`).join("<br>"));
+  if(fast.length) line("warn","速",`確認が速すぎる記録 ${fast.length}件`,
+    fast.map(r=>`${esc(r.date.slice(5))} ${esc(FLOWS[r.flow].name)}／${esc(r.worker)}　${(r.answers||[]).length}項目を ${Math.floor(r.durSec/60)}分${r.durSec%60}秒`).join("<br>")
+    + "<br>現物を見ずに押した可能性があります。本人に聞いてください。");
+  if(gaps.length) line("warn","欠",`途中までしかしていない車 ${gaps.length}件`,
+    gaps.map(g=>`${esc(g[0].slice(5))} ${esc(g[1])} … ${g[2]}が未実施`).join("<br>"));
+  if(!A.children.length) line("ok","済","この期間、気になる記録はありません",
+    `${rows.length}件すべてが最後まで完了しています。`);
+  app.appendChild(alertCard);
+
+  const per = {};
+  rows.forEach(r=>{
+    const w = r.worker || "（氏名なし）";
+    (per[w] ||= {n:0, sec:0, ans:0, fast:0, pend:0});
+    per[w].n++; per[w].sec += r.durSec||0; per[w].ans += (r.answers||[]).length;
+    if((r.flags||[]).includes("fast")) per[w].fast++;
+    if((r.flags||[]).includes("pending")) per[w].pend++;
+  });
+  const pc = el(`<div class="card"><div class="card-h"><div class="eyebrow">People</div>
+    <div class="ttl">担当者ごとの様子</div></div><div class="card-b" style="overflow-x:auto">
+    <table class="board"><thead><tr><th>氏名</th><th>件数</th><th>1問あたり</th><th></th></tr></thead><tbody></tbody></table>
+    <p class="why" style="margin:9px 0 0">1問あたりの秒数が短い人は、現物を見ずに押している可能性があります。
+      指差呼称をすれば、1問におよそ5〜15秒かかります。</p></div></div>`);
+  const tb = pc.querySelector("tbody");
+  Object.entries(per).sort((a,b)=>(a[1].sec/Math.max(1,a[1].ans))-(b[1].sec/Math.max(1,b[1].ans))).forEach(([w,v])=>{
+    const sp = v.ans ? v.sec/v.ans : 0;
+    const cls = sp<3 ? "off" : sp<5 ? "flag" : "on";
+    tb.appendChild(el(`<tr><td style="font-weight:700">${esc(w)}</td>
+      <td class="plate">${v.n}</td>
+      <td><span class="chip ${cls}">${sp.toFixed(1)} 秒</span></td>
+      <td><div class="chips">${v.fast?`<span class="chip flag">速すぎ ${v.fast}</span>`:""}${v.pend?`<span class="chip off">未対応 ${v.pend}</span>`:""}</div></td></tr>`));
+  });
+  app.appendChild(pc);
+
+  const lc = el(`<div class="card"><div class="card-h"><div class="eyebrow">Log</div>
+    <div class="ttl">記録一覧</div><div style="margin-left:auto;font-size:12.5px;color:var(--ink3)">${rows.length}件</div></div>
+    <div class="card-b" id="l"></div></div>`);
+  const L = lc.querySelector("#l");
+  rows.forEach(r=>{
+    const tag = r.status==="blocked" ? `<span class="chip off">止めた</span>`
+      : (r.flags||[]).includes("pending") ? `<span class="chip off">未対応あり</span>`
+      : (r.flags||[]).includes("fast") ? `<span class="chip flag">確認が速すぎ</span>`
+      : `<span class="chip on">完了</span>`;
+    const row = el(`<div class="rec"><span class="t">${esc(r.date.slice(5).replace("-","/"))}<br>${esc(r.endedAt||"")}</span>
+      <span class="m"><b>${esc(FLOWS[r.flow].name)}</b> ${tag}
+        <div>${esc([r.vehicle,r.site,r.worker&&(r.worker+(r.driver?" / "+r.driver:""))].filter(Boolean).join("　"))}</div>
+        <div>所要 ${Math.floor(r.durSec/60)}分${r.durSec%60}秒 ／ ${(r.answers||[]).length}項目</div>
+        ${r.blockedAt?`<div style="color:var(--stop)">止めた理由：${esc(r.blockedAt)}</div>`:""}
+        <button class="iconbtn" style="margin-top:6px">中身を見る</button></span></div>`);
+    row.querySelector("button").addEventListener("click",()=>showWatchDetail(r));
+    L.appendChild(row);
+  });
+  app.appendChild(lc);
+
+  const dz = el(`<div class="card"><div class="card-b" style="display:flex;flex-direction:column;gap:9px">
+    <button class="tapbtn plain" id="cp">この期間の報告文をコピー</button>
+    <button class="tapbtn neg" id="cl">読み込んだ記録をすべて消す</button></div></div>`);
+  dz.querySelector("#cp").addEventListener("click",()=>copyOut(reportText(rows),"報告文をコピーしました"));
+  if(dbState==="on"){
+    const pb = el(`<button class="tapbtn plain">90日より古い記録をスプレッドシートから消す</button>`);
+    pb.addEventListener("click",async()=>{
+      const lim = new Date(); lim.setDate(lim.getDate()-90);
+      const old = (cloudSub.rows||[]).filter(r=>r.date < ymd(lim));
+      if(!old.length) return toast("90日より古い記録はありません");
+      if(!confirm(`${old.length}件をスプレッドシートから消します。元に戻せません。`)) return;
+      toast("消しています…");
+      const n = await deleteCloud(old.map(r=>r.id));
+      toast(`${n}件を消しました`);
+    });
+    dz.querySelector(".card-b").insertBefore(pb, dz.querySelector("#cl"));
+  }
+  dz.querySelector("#cl").addEventListener("click",()=>{
+    if(!confirm("この端末の閲覧モードに貯めた記録を消します。よろしいですか。")) return;
+    W=[]; saveW();
+    if(dbState==="on") toast("貼り付け分を消しました。自動で集まる記録は残ります");
+    render();
+  });
+  app.appendChild(dz);
+  app.appendChild(el(`<p class="foot">${dbState==="on"?"記録は担当者の端末から自動で集まります。":"貼り付けた記録は、この端末の閲覧モードにだけ貯まります。"}<br>
+    この画面から、担当者の記録を書き換えることはできません。</p>`));
+}
+
+function showWatchDetail(r){
+  runnerEl.innerHTML="";
+  const f = FLOWS[r.flow];
+  const steps = f.steps;
+  const box = el(`<div class="runner"><div class="runner-in">
+    <div class="rbar"><span class="flow">${esc(f.name)}</span><span class="step">${esc(r.id)}</span>
+      <button class="iconbtn x" id="back">閉じる</button></div>
+    <div class="stage" style="justify-content:flex-start;gap:13px">
+      <div class="card"><div class="card-b">
+        <dl style="display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:0;font-size:13.5px">
+          <dt style="color:var(--ink3)">日付</dt><dd style="margin:0;font-weight:700">${esc(jpDate(r.date))}</dd>
+          ${r.vehicle?`<dt style="color:var(--ink3)">車番</dt><dd style="margin:0;font-weight:700">${esc(r.vehicle)}</dd>`:""}
+          ${r.site?`<dt style="color:var(--ink3)">現場</dt><dd style="margin:0;font-weight:700">${esc(r.site)}</dd>`:""}
+          <dt style="color:var(--ink3)">実施者</dt><dd style="margin:0;font-weight:700">${esc(r.worker)}${r.driver?" ／ "+esc(r.driver):""}</dd>
+          <dt style="color:var(--ink3)">時刻</dt><dd style="margin:0;font-weight:700">${esc(r.startedAt)} → ${esc(r.endedAt)}（${Math.floor(r.durSec/60)}分${r.durSec%60}秒）</dd>
+          <dt style="color:var(--ink3)">結果</dt><dd style="margin:0;font-weight:700">${esc(statusJP(r))}</dd>
+        </dl></div></div>
+      ${r.items&&r.items.length?`<div class="card"><div class="card-b">
+        <div class="eyebrow" style="margin-bottom:7px">積んだ品（リスト数量＝数えた数）</div>
+        <div class="itemlist">${r.items.map(i=>`<div class="item"><span class="nm">${esc(i.name)}</span>
+          <span class="qty">${i.counted}</span></div>`).join("")}</div></div></div>`:""}
+      <div class="card"><div class="card-b">
+        <div class="eyebrow" style="margin-bottom:5px">答えた内容と時刻</div>
+        ${(r.answers||[]).map((a,n)=>`<div class="rec"><span class="t">${esc(a.at)}</span>
+          <span class="m"><b>${esc(a.a)}</b><div>${esc(a.q || (steps[n]? steps[n].q : ""))}</div></span></div>`).join("")
+          || `<p class="sub" style="margin:0">記録なし</p>`}
+        <p class="why" style="margin:9px 0 0">時刻の間隔が、実際に見て確かめた時間です。<br>
+        同じ時刻が並んでいる場合は、現物を見ずに連続で押した可能性があります。</p>
+      </div></div>
+    </div></div></div>`);
+  box.querySelector("#back").addEventListener("click",()=>render());
+  runnerEl.appendChild(box);
+  window.scrollTo(0,0);
+}
+
+function syncCard(){
+  const un = unsentCount();
+  if(!storageOK)
+    return el(`<div class="alert stop" style="font-size:13px"><div class="ic">警</div>
+      <div><b>この端末では記録を一時保存できません</b>
+      ブラウザの設定で「サードパーティCookie」が拒否になっているか、シークレットモードで開いています。
+      チェックはできますが、<b>電波のない場所では使わないでください</b>（送れなかった記録が消えます）。
+      Chromeの 設定 → サイトの設定 → サードパーティCookie を「許可する」にしてください。</div></div>`);
+  if(dbState === "connecting")
+    return el(`<div class="alert warn" style="font-size:13px"><div class="ic">…</div>
+      <div>上長への自動共有につないでいます</div></div>`);
+  if(dbState === "off")
+    return el(`<div class="alert warn" style="font-size:13px"><div class="ic">端</div>
+      <div><b>この端末だけに保存されています</b>
+      自動共有につながっていません。「記録」画面から記録コードをコピーして、上長へ送ってください。</div></div>`);
+  if(un)
+    return (()=>{ const c = el(`<div class="alert warn" style="font-size:13px;flex-direction:column;align-items:stretch">
+      <div style="display:flex;gap:11px"><div class="ic">送</div>
+      <div><b>まだ送っていない記録が ${un}件 あります</b>電波の届く場所でもう一度お試しください。</div></div>
+      <button class="tapbtn plain" id="s" style="margin-top:9px">いま送る</button></div>`);
+      c.querySelector("#s").addEventListener("click",()=>pushPending()); return c; })();
+  return el(`<div class="alert ok" style="font-size:13px"><div class="ic">共</div>
+    <div>上長へ自動で共有されています</div></div>`);
+}
+
+if(location.hash === "#kanri") view = "watch";
+render();
+initDB();
+</script>
+</body>
+</html>
